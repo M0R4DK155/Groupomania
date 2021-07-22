@@ -19,7 +19,7 @@ exports.signup = (req, res, next) => {
   bcrypt.hash(req.body.password, 10)
     .then(hash => {
       const user = new User({
-        email: mask(req.body.email),
+        email: (req.body.email),
         password: hash
       });
       user.save()
@@ -39,7 +39,7 @@ exports.signup = (req, res, next) => {
  */
 
 exports.login = (req, res, next) => {
-  User.findOne({ email: mask(req.body.email) })
+  User.findOne({ email: (req.body.email) })
     .then(user => {
       if (!user) {
         return res.status(401).json({ error: 'Utilisateur non trouvé !' });
@@ -63,32 +63,7 @@ exports.login = (req, res, next) => {
     .catch(error => res.status(500).json({ error }));
 };
 
-/**
- * [Masquage/Hashage de l'email]
- * @param   {string}    email   Email de l'utilisateur.
- * @param   {boolean}   reveal  Sur false par défaut.
- * 
- * @return  {String}            Adresse Email masquée.
- */
-
-function mask(email, reveal=false){
-    let newMail = "";
-    let code;
-    let arobase = false;
-    for (let i=0, size = email.length;i<size; i++){
-        if (email[i] === "@"){
-            arobase = true;
-            newMail+="@";
-            continue;
-        }
-        if (arobase && email[i] === "."){
-            newMail+=email.slice(i);
-            break;
-        }
-        if (reveal) code = email.charCodeAt(i)-1;
-        else code = email.charCodeAt(i)+1;
-
-        newMail +=String.fromCharCode(code);
-    }
-    return newMail;
-}
+exports.update= (req, res, next) => {};
+exports.getOneUser= (req, res, next) => {};
+exports.getAllUser= (req, res, next) => {};
+exports.deleteUser= (req, res, next) => {};

@@ -1,17 +1,14 @@
 // Base P6
 // Fichier contenant notre logique métier.
-const Sauce = require('../models/Sauce');
+const Post = require('../models/Post');
 const fs = require('fs');
 
 /**
- * Route POST pour la création d'une sauce - Ajoute une sauce à la base de données.
+ * Route POST pour la création d'un post - Ajoute une sauce à la base de données.
  *
  * @param   {Object}  req.body                  Object du formulaire.
  * @param   {String}  req.body.userId           Id de l'utlisateur.
- * @param   {String}  req.body.name             Nom de l'utlisateur.
- * @param   {String}  req.body.manufacturer     Fabricant de la sauce.
- * @param   {String}  req.body.description      Description de la sauce.
- * @param   {String}  req.body.mainPepper       Ingrédient principal de la sauce.
+ * @param   {String}  req.body.name             Nom de l'utilisateur.
  * @param   {String}  req.body.file.filename    Nom de la photo.
  * @param   {Number}  req.body.heat             Force de la sauce.
  * 
@@ -19,38 +16,42 @@ const fs = require('fs');
  * 
  */
 
-exports.createSauce = (req, res, next) => {
-    const sauceObject = JSON.parse(req.body.sauce);
-    delete sauceObject._id;
-    const sauce = new Sauce({
-        ...sauceObject,
+exports.createPost = (req, res, next) => {
+    const postObject = JSON.parse(req.body.post);
+    delete postObject._id;
+    const post = new Post({
+        ...postObject,
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`, // On génère l'URL de l'image (le protocole, le nom d'hôte et le nom du fichier).
         likes: "0",
         dislikes: "0",
         usersLiked: [`First`],
         usersDisliked: [`First`]
     });
-    sauce.save()
-    .then(() => res.status(201).json({ message: 'Sauce ajoutée avec succès !' })) // Message d'alerte.
+    post.save()
+    .then(() => res.status(201).json({ message: 'Post ajouté avec succès !' })) // Message d'alerte.
     .catch(error => {
         res.status(400).json({ error })
     });
 };
 
 /**
- * Route GET pour la lecture de toutes les sauces - Récupère toutes les infos de toutes les sauces.
+ * Route GET pour la lecture de tous les posts - Récupère toutes les infos de tous les posts.
  *
- * @return  {JSON}      JSON de toutes les sauces.
+ * @return  {JSON}      JSON de tous les posts.
  */
 
-exports.getAllSauces = (req, res, next) => {
-    Sauce.find()
-        .then(sauces => res.status(200).json( sauces ))
-        .catch(error => res.status(400).json({ error }));
+exports.getAllPosts = (req, res, next) => {
+    try{
+        const data = Post.getAllPostsWithTheirComments();
+         res.status(200).json( data );
+    }
+    catch(error){
+        res.status(400).json({ error })
+    };
 };
 
 /**
- * Route GET pour la lecture d'une sauce - Récupère toutes les infos d'une seule sauce.
+ * Route GET pour la lecture d'un post - Récupère toutes les infos d'une seule sauce.
  *
  * @param   {String}  req.params.id     Id de la sauce.
  *
@@ -166,3 +167,8 @@ exports.like = (req, res, next) => {
         .catch(error => res.status(500).json({ error }));
 }
 
+
+
+exports.getOnePost=  (req, res, next) => {};
+exports.modifyPost=  (req, res, next) => {};
+exports.deletePost=  (req, res, next) => {};
