@@ -1,22 +1,89 @@
-
 /**
- * Ajout d'un utilisateur dans la base de donnée
- *
- * @param   {Object}  user                Champs du formulaire
- * @param   {String}  user.body.prenom    Prénom de l'utilisateur
- * @param   {String}  user.body.nom       Nom de l'utilisateur
- * @param   {String}  user.body.pseudo    Pseudo de l'utilisateur
- * @param   {String}  user.body.password  Password de l'utilisateur
- * @param   {String}  user.body.email     Email de l'utilisateur
- * @param   {String}  user.body.avatar    URL du fichier
- * @param   {String}  user.body.role      Rôle de l'utilisateur 
- *
- * @return  {[type]}        [return description]
+ * @typedef {import("../typedef.js").FullUserDataFromBase} FullUserDataFromBase
  */
 
-async function addUser(user) {
+const database = require("./database");
+
+/**
+ * Ajout d'un utilisateur dans la BDD.
+ *
+ * @param   {Object}  user              Champs du formulaire.
+ * @param   {String}  user.firstname    Prénom de l'utilisateur.
+ * @param   {String}  user.lastname     Nom de l'utilisateur.
+ * @param   {String}  user.alias        Pseudo de l'utilisateur.
+ * @param   {String}  user.avatar       Photo du Profil.
+ * @param   {String}  user.password     Password de l'utilisateur.
+ * @param   {String}  user.email        Email de l'utilisateur.
+ *
+ * @return  {Promise.<void>}            Insère les données dans la BDD.
+ */
+
+module.exports.addUser = async function (user) {
     try {
-        const res = await database.User("INSERT INTO users(prenom, nom, pseudo, password, email, avatar, id_roles) VALUES (?,?,?,?,?,?,?)", [user.body.prenom, user.body.nom, user.body.pseudo, user.body.password, user.body.email, user.file.filename, user.body.role]);
+        const res = await database.query("INSERT INTO users(prenom, nom, pseudo, password, email, id_roles) VALUES (?,?,?,?,?,?,?)", [user.firstname, user.lastname, user.alias, user.avatar, user.password, user.email, 0]);
+    }
+    catch (error) {
+        throw {
+            status: 500,
+            msg: error
+        };
+    }
+}
+
+/**
+ * Recherche d'un utilisateur par son email.
+ * 
+ * @param   {String}  email                     Email de l'utilisateur.
+ *
+ * @return  {Promise.<FullUserDataFromBase>}    Récupère les données de l'utilisateur dans la BDD.
+ */
+
+module.exports.findUserByEmail = async function (email){
+    try {
+        const res = await database.getOne("SELECT * FROM `users` WHERE `email` = ?", [email]);
+        if (res === null) throw( {status : 401, msg : "L'utilisateur n'existe pas"});
+        return res;
+    }
+    catch (error) {
+        throw ({
+            status: error.status || 500,
+            msg: error.msg ? error.msg : error
+        });
+    }
+}
+
+/**
+ * Modification du profil utilisateur.
+ *
+ * @param   {Object}  user      Champs du formulaire.
+ * @param   {Number}  id        id de l'utilisateur.
+ *
+ * @return  {Promise.<void>}    Modifie les données dans la BDD.
+ */
+
+module.exports.modifyUser = async function (user, id){
+    try{
+        const res = await database.getOne("UPDATE users SET prenom=?, nom=?, pseudo=? WHERE id=?", [user.firstname, user.lastname, user.alias, id]);
+        return res;
+    }
+    catch (error) {
+        throw({
+            status: 500,
+            msg: error
+        });
+    }
+}
+
+/**
+ * Suppression d'un utilisateur.
+ *
+ * @param   {Number}  id        id de l'utilisateur.
+ *
+ * @return  {Promise.<void>}    
+ */
+module.exports.deleteUser = async function (id) {
+    try {
+        const res = await database.getOne("DELETE FROM users WHERE id = ?", [id]);
         return res;
     }
     catch (error) {
@@ -26,3 +93,34 @@ async function addUser(user) {
         });
     }
 }
+
+/**
+ * Ajouter une publication.
+ * 
+ * [addPost description]
+ *
+ * @param   {String}  email                     [email description]
+ *
+ * @return  {Promise.<FullUserDataFromBase>}    [return description]
+ */
+
+
+/**
+ * Modifier une publication.
+ * 
+ * [modifyPost description]
+ *
+ * @param   {String}  email                     [email description]
+ *
+ * @return  {Promise.<FullUserDataFromBase>}    [return description]
+ */
+
+/**
+ * Supprimer une publication.
+ * 
+ * [deletePost description]
+ *
+ * @param   {String}  email                     [email description]
+ *
+ * @return  {Promise.<FullUserDataFromBase>}    [return description]
+ */

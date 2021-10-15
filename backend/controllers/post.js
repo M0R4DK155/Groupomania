@@ -1,16 +1,15 @@
-// Base P6
 // Fichier contenant notre logique métier.
 const Post = require('../models/Post');
-const fs = require('fs');
+const fs = require('fs'); 
+const { post } = require('../routes/user');
 
 /**
- * Route POST pour la création d'un post - Ajoute une sauce à la base de données.
+ * Route POST pour la création d'une publication - Ajoute une publication à la base de données.
  *
  * @param   {Object}  req.body                  Object du formulaire.
  * @param   {String}  req.body.userId           Id de l'utlisateur.
  * @param   {String}  req.body.name             Nom de l'utilisateur.
- * @param   {String}  req.body.file.filename    Nom de la photo.
- * @param   {Number}  req.body.heat             Force de la sauce.
+ * @param   {String}  req.file.filename    Nom de la photo.
  * 
  * @returns {void}
  * 
@@ -21,23 +20,23 @@ exports.createPost = (req, res, next) => {
     delete postObject._id;
     const post = new Post({
         ...postObject,
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`, // On génère l'URL de l'image (le protocole, le nom d'hôte et le nom du fichier).
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.body.file.filename}`, // On génère l'URL de l'image (le protocole, le nom d'hôte et le nom du fichier).
         likes: "0",
         dislikes: "0",
         usersLiked: [`First`],
         usersDisliked: [`First`]
     });
     post.save()
-    .then(() => res.status(201).json({ message: 'Post ajouté avec succès !' })) // Message d'alerte.
+    .then(() => res.status(201).json({ message: 'Publication ajoutée avec succès !' })) // Message d'alerte.
     .catch(error => {
         res.status(400).json({ error })
     });
 };
 
 /**
- * Route GET pour la lecture de tous les posts - Récupère toutes les infos de tous les posts.
+ * Route GET pour la lecture de toutes les publications - Récupère toutes les publications.
  *
- * @return  {JSON}      JSON de tous les posts.
+ * @return  {JSON}      JSON de tous les publications.
  */
 
 exports.getAllPosts = (req, res, next) => {
@@ -51,58 +50,58 @@ exports.getAllPosts = (req, res, next) => {
 };
 
 /**
- * Route GET pour la lecture d'un post - Récupère toutes les infos d'une seule sauce.
+ * Route GET pour la lecture d'un post - Récupère toutes les infos d'une seule publication.
  *
- * @param   {String}  req.params.id     Id de la sauce.
+ * @param   {String}  req.params.id     Id de la publication.
  *
- * @return  {JSON}                      JSON de la sauce demandée.
+ * @return  {JSON}                      JSON de la publication demandée.
  */
 
-exports.getOneSauce = (req, res, next) => {
-    Sauce.findOne({ _id: req.params.id }) // Méthode findOne de mongoose afin de récupérer l’objet unique à partir de son id.
-        .then(sauce => res.status(200).json(sauce))
+exports.getOnePost = (req, res, next) => {
+    Post.findOne({ _id: req.params.id }) // Méthode findOne de mongoose afin de récupérer l’objet unique à partir de son id.
+        .then(post => res.status(200).json(post))
         .catch(error => res.status(404).json({ error }));
 };
 
 /**
- * Route PUT pour la modification d'une sauce - Mettre à jour une sauce.
+ * Route PUT pour la modification d'une publication - Mettre à jour une publication.
  *
- * @param   {String}  req.params.id     Id de la sauce.
+ * @param   {String}  req.params.id     Id de la publication.
  * @param   {Object}  req.body          Tous les champs du formulaire.
  * 
  * @returns {void}
  */
 
-exports.modifySauce = (req, res, next) => {
-    const sauceObject = req.file ?
+exports.modifyPost = (req, res, next) => {
+    const postObject = req.file ?
         {
-            ...JSON.parse(req.body.sauce),
+            ...JSON.parse(req.body.post),
             imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
         } : { ...req.body };
-    Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+    Post.updateOne({ _id: req.params.id }, { ...postObject, _id: req.params.id })
         .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
         .catch(error => res.status(400).json({ error }));
 };
 
 /**
- * Route DELETE pour la suppression d'une sauce - Supprimer une sauce. /api/sauces/:id
+ * Route DELETE pour la suppression d'une publication - Supprimer une publication. /api/posts/:id
  *
- * @param   {String}  req.params.id   Id de la sauce.
+ * @param   {String}  req.params.id   Id de la publication.
  * 
  * @returns {void}
  */
 
-exports.deleteSauce = (req, res, next) => {
+exports.deletePost = (req, res, next) => {
   // Avant de suppr l'objet, on va le chercher pour obtenir l'url de l'image et supprimer le fichier image de la BDD.
-  Sauce.findOne({ _id: req.params.id }) //méthode findOne de mongoose afin de récupérer l’objet à partir de son id.
-    .then(sauce => {
-      // Pour extraire ce fichier, on récupère l'url de la sauce, et on le split autour de la chaine de caractères, donc le nom du fichier.
-      const filename = sauce.imageUrl.split('/images/')[1];
+  Post.findOne({ _id: req.params.id }) //méthode findOne de mongoose afin de récupérer l’objet à partir de son id.
+    .then(post => {
+      // Pour extraire ce fichier, on récupère l'url de la publication, et on le split autour de la chaine de caractères, donc le nom du fichier.
+      const filename = post.imageUrl.split('/images/')[1];
       // Avec ce nom de fichier, on appelle unlink pour suppr le fichier.
       fs.unlink(`images/${filename}`, () => {
         // On supprime le document correspondant de la base de données.
-        Sauce.deleteOne({ _id: req.params.id })
-          .then(() => res.status(200).json({ message: 'Sauce supprimée !' }))
+        Post.deleteOne({ _id: req.params.id })
+          .then(() => res.status(200).json({ message: 'Publication supprimée !' }))
           .catch(error => res.status(400).json({ error }));
       });
     })
@@ -110,18 +109,18 @@ exports.deleteSauce = (req, res, next) => {
 };
 
 /**
- * Like / Dislike une sauce - Route POST pour le like/dislike d'une sauce.
+ * Like / Dislike une publication - Route POST pour le like/dislike d'une publication.
  *
- * @param   {String}  req.params.id   Id de la sauce.
+ * @param   {String}  req.params.id   Id de la publication.
  * @param   {Number}  req.body.like   1 / 0 / -1.
  * @param   {String}  req.body.userId userId de l'utlisateur.
  *
  * @returns {void}
  */
 
-exports.like = (req, res, next) => {
-  Sauce.findOne({ _id: req.params.id })
-        .then(sauce => {
+exports.likePost = (req, res, next) => {
+  Post.findOne({ _id: req.params.id })
+        .then(post => {
             let like = req.body.like;
             let option = {};
             switch(like) {
@@ -133,7 +132,7 @@ exports.like = (req, res, next) => {
                         };
                     break;
                 case 0:
-                    for (let userId of sauce.usersDisliked) {
+                    for (let userId of post.usersDisliked) {
                         if (req.body.userId === userId ) {
                             option = 
                             {
@@ -142,7 +141,7 @@ exports.like = (req, res, next) => {
                             };
                         };
                     };
-                    for (let userId of sauce.usersLiked) {            
+                    for (let userId of post.usersLiked) {            
                         if (req.body.userId === userId ) {
                             option =
                             {
@@ -160,7 +159,7 @@ exports.like = (req, res, next) => {
                         };
                     break;
             }
-            Sauce.updateOne({ _id: req.params.id }, option)
+            Post.updateOne({ _id: req.params.id }, option)
                 .then(() => res.status(200).json({ message: "Objet Liké!" }))      
                 .catch(error => res.status(400).json({ error }));
         })

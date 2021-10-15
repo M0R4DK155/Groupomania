@@ -7,13 +7,9 @@ const pool = mariadb.createPool({
     connectionLimit: 5,
 });
 
-function removeMeta(response) {
-    delete response.meta;
-    return response;
-}
 async function getOne(sql, data = []) {
     const result =  await query(sql, data);
-    return result[0];
+    return result[0] || null;
 }
 
 async function query(sql, data = []) {
@@ -21,7 +17,8 @@ async function query(sql, data = []) {
     try {
         conn = await pool.getConnection();
         const response = await conn.query(sql, data);
-        return removeMeta(response);
+        if (response.meta !== undefined) delete response.meta;
+        return response;
     } catch (err) {
         throw err;
     } finally {

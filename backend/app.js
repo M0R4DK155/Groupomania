@@ -11,7 +11,7 @@ const userRoute = require ('./routes/user');
 // Importation du router post.
 const postRoute = require('./routes/post');
 
-const post = require("./controllers/posts");
+const post = require("./controllers/post");
 
 // Mise en place d'un header sécurisé pour lutter contre les failles XSS.
 app.use(helmet());                      
@@ -23,7 +23,7 @@ app.use(cors({
 
 // Middleware général appliqué à toutes les requêtes (CORS).
 app.use((req, res, next) => {                                                                                                       
-    res.setHeader('Access-Control-Allow-Origin', '*');                                                                              // Autorisation d'acceder à notre API.
+    res.setHeader('Access-Control-Allow-Origin', '*');                                                                              // Autorisation d'accéder à notre API.
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');        // Autorisation d'utiliser certains headers.
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');                                        // Autorisation d'utiliser certaines méthodes.
     next();
