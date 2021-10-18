@@ -53,6 +53,27 @@ module.exports.findUserByEmail = async function (email){
 }
 
 /**
+ * Recherche d'un utilisateur par son email.
+ * 
+ * @param   {String}  userId                     Id de l'utilisateur.
+ *
+ * @return  {Promise.<FullUserDataFromBase>}     Récupère les données de l'utilisateur dans la BDD.
+ */
+
+module.exports.findUserById = async function (userId){
+    try {
+        const res = await database.getOne("SELECT * FROM `users` WHERE `id` = ?", [userId]);
+        if (res === null) throw( {status : 401, msg : "L'utilisateur n'existe pas"});
+        return res;
+    }
+    catch (error) {
+        throw ({
+            status: error.status || 500,
+            msg: error.msg ? error.msg : error
+        });
+    }
+}
+/**
  * Modification du profil utilisateur.
  *
  * @param   {Object}  user      Champs du formulaire.
@@ -77,7 +98,7 @@ module.exports.modifyUser = async function (user, id){
 /**
  * Suppression d'un utilisateur.
  *
- * @param   {Number}  id        id de l'utilisateur.
+ * @param   {String}  id        id de l'utilisateur.
  *
  * @return  {Promise.<void>}    
  */
@@ -93,34 +114,3 @@ module.exports.deleteUser = async function (id) {
         });
     }
 }
-
-/**
- * Ajouter une publication.
- * 
- * [addPost description]
- *
- * @param   {String}  email                     [email description]
- *
- * @return  {Promise.<FullUserDataFromBase>}    [return description]
- */
-
-
-/**
- * Modifier une publication.
- * 
- * [modifyPost description]
- *
- * @param   {String}  email                     [email description]
- *
- * @return  {Promise.<FullUserDataFromBase>}    [return description]
- */
-
-/**
- * Supprimer une publication.
- * 
- * [deletePost description]
- *
- * @param   {String}  email                     [email description]
- *
- * @return  {Promise.<FullUserDataFromBase>}    [return description]
- */

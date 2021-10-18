@@ -1,30 +1,29 @@
 // Fichier contenant notre logique métier.
 const Post = require('../models/Post');
 const fs = require('fs'); 
-const { post } = require('../routes/user');
 
 /**
- * Route POST pour la création d'une publication - Ajoute une publication à la base de données.
+ * Route POST pour la création d'une publication - Ajoute une publication à la BDD.
  *
- * @param   {Object}  req.body                  Object du formulaire.
+ * @param   {Object}  req                       La requête.
+ * @param   {Object}  req.body                  Champ du formulaire.
  * @param   {String}  req.body.userId           Id de l'utlisateur.
- * @param   {String}  req.body.name             Nom de l'utilisateur.
- * @param   {String}  req.file.filename    Nom de la photo.
+ * @param   {String}  req.body.message          Contenu de la publication.
+ * @param   {Object}  req.file                  Image de la publication.
+ * @param   {String}  req.file.filename         Image de la publication.
+ * @param   {("GET" | "POST")}  req.protocol    get ou post
  * 
  * @returns {void}
  * 
  */
 
 exports.createPost = (req, res, next) => {
-    const postObject = JSON.parse(req.body.post);
+    const postObject = JSON.parse(req.body.message);
     delete postObject._id;
-    const post = new Post({
+    const post = Post.addPost({
         ...postObject,
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.body.file.filename}`, // On génère l'URL de l'image (le protocole, le nom d'hôte et le nom du fichier).
-        likes: "0",
-        dislikes: "0",
-        usersLiked: [`First`],
-        usersDisliked: [`First`]
+        message: `${req.body.message, req.body.userId}`,
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`, // On génère l'URL de l'image (le protocole, le nom d'hôte et le nom du fichier).
     });
     post.save()
     .then(() => res.status(201).json({ message: 'Publication ajoutée avec succès !' })) // Message d'alerte.
@@ -52,13 +51,13 @@ exports.getAllPosts = (req, res, next) => {
 /**
  * Route GET pour la lecture d'un post - Récupère toutes les infos d'une seule publication.
  *
- * @param   {String}  req.params.id     Id de la publication.
+ * @param   {String}  req.body.postId     Id de la publication.
  *
  * @return  {JSON}                      JSON de la publication demandée.
  */
 
 exports.getOnePost = (req, res, next) => {
-    Post.findOne({ _id: req.params.id }) // Méthode findOne de mongoose afin de récupérer l’objet unique à partir de son id.
+    Post.getPostWithItsComments({ _id: req.body.postId }) 
         .then(post => res.status(200).json(post))
         .catch(error => res.status(404).json({ error }));
 };
@@ -107,67 +106,3 @@ exports.deletePost = (req, res, next) => {
     })
     .catch(error => res.status(500).json({ error }));
 };
-
-/**
- * Like / Dislike une publication - Route POST pour le like/dislike d'une publication.
- *
- * @param   {String}  req.params.id   Id de la publication.
- * @param   {Number}  req.body.like   1 / 0 / -1.
- * @param   {String}  req.body.userId userId de l'utlisateur.
- *
- * @returns {void}
- */
-
-exports.likePost = (req, res, next) => {
-  Post.findOne({ _id: req.params.id })
-        .then(post => {
-            let like = req.body.like;
-            let option = {};
-            switch(like) {
-                case -1:
-                    option =
-                        {
-                            $push : { usersDisliked : req.body.userId },
-                            $inc: { dislikes : 1 }
-                        };
-                    break;
-                case 0:
-                    for (let userId of post.usersDisliked) {
-                        if (req.body.userId === userId ) {
-                            option = 
-                            {
-                                $pull : { usersDisliked : userId },
-                                $inc : { dislikes : -1 }  
-                            };
-                        };
-                    };
-                    for (let userId of post.usersLiked) {            
-                        if (req.body.userId === userId ) {
-                            option =
-                            {
-                                $pull : { usersLiked : userId },
-                                $inc: { likes : -1 }
-                            };
-                        };
-                    };
-                    break;
-                case 1:
-                    option =
-                        {   
-                            $inc : { likes : 1 },
-                            $push : { usersLiked : req.body.userId }
-                        };
-                    break;
-            }
-            Post.updateOne({ _id: req.params.id }, option)
-                .then(() => res.status(200).json({ message: "Objet Liké!" }))      
-                .catch(error => res.status(400).json({ error }));
-        })
-        .catch(error => res.status(500).json({ error }));
-}
-
-
-
-exports.getOnePost=  (req, res, next) => {};
-exports.modifyPost=  (req, res, next) => {};
-exports.deletePost=  (req, res, next) => {};

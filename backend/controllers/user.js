@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 /**
  * @typedef {import("../typedef.js").simpleMessage}         simpleMessage 
  * @typedef {import("../typedef.js").FullUserDataFromBase}  FullUserDataFromBase 
@@ -11,7 +13,7 @@ const User = require('../models/User');
 
 // Middlewares d'authentification.
 /**
- * Enregistrement de l'utilisateur /api/auth/signup.
+ * Enregistrement de l'utilisateur /user/signup.
  *
  * @param   {Object}  req                   La requête.
  * @param   {Object}  req.body              Champs du formulaire.
@@ -48,7 +50,7 @@ exports.signup = async (req, res, next) => {
 };
 
 /**
- * Connecter un utilisateur - Route login /user/login
+ * Connecter un utilisateur - Route login user/login
  *
  * @param   {Object}  req                   La requête.
  * @param   {Object}  req.body              Champs du formulaire.
@@ -79,12 +81,12 @@ exports.login = async (req, res, next) => {
     }
 };
 
-
 /**
- * Modifier le profil d'un utilisateur - Route login /user/profil
+ * Modifier le profil d'un utilisateur - api/user/profil
  *
  * @param   {Object}  req                   La requête.
  * @param   {Object}  req.body              Champs du formulaire.
+ * @param   {Number}  req.body.userId       Id de l'utilisateur.
  * @param   {String}  req.body.alias        Pseudo de l'utilisateur.
  * @param   {String}  req.body.avatar       Photo de Profil.
  * @param   {String}  req.body.firstname    Prénom de l'utilisateur.
@@ -93,12 +95,12 @@ exports.login = async (req, res, next) => {
  */
 exports.modifyUser = async (req, res, next) => {
     try {
-        const userData = await User.modifyUser(req, req.params.id);
+        const userData = await User.modifyUser(req, req.body.userId);
         res.status(201).json({
             prenom: req.body.firstname,
             nom: req.body.lastname,
             pseudo: req.body.alias,
-            
+            avatar: req.body.avatar
         });
     }
     catch(err){
@@ -107,15 +109,17 @@ exports.modifyUser = async (req, res, next) => {
 }
 
 /**
- * Afficher son profil utilisateur.
+ * Afficher son profil utilisateur. - Route login /user/bio
  *
- * @param   {Number}    req.params.id   id de l'utilisateur.
+ * @param   {Object}    req               La requête
+ * @param   {Object}    req.body          Champ du formulaire
+ * @param   {String}    req.body.userId   email de l'utilisateur.
  * 
- * @return  {Promise.<void>}                      Rempli la réponse avec un FullUserDataFromBase et l'envoi.
+ * @return  {Promise.<void>}              Rempli la réponse avec un FullUserDataFromBase et l'envoi.
  */
 exports.getOneUser = async (req, res, next) => {
     try {
-        const user = await User.findUserByEmail(req.params.id);
+        const user = await User.findUserById(req.body.userId);
         res.status(201).json({ user });
     }
     catch(err){
@@ -123,24 +127,20 @@ exports.getOneUser = async (req, res, next) => {
     }
 };
 
-
 /**
  * Supprimer un profil utilisateur - Route user
  *
- * @param   {Number}  req.params.id     id de l'utilisateur à supprimer.
+ * @param   {Object}    req               La requête
+ * @param   {Object}    req.body          Champ du formulaire
+ * @param   {String}    req.body.userId   id de l'utilisateur.
  * 
  * @return  {Promise.<void>}          
  */
 exports.deleteUser = async (req, res, next) => {
     try {
-        const user = await User.findUserByEmail(email);
-        const image_user = await Image.getAllPosts(req.params.id);
-        for (let i = 0; i < image_user.length; i++) {
-            await Delete.imageStorie(image_user[i].content);
-        }
-        await delete.imageUser(user.avatar);
-        await User.deleteUser(req.params.id);
-        await Image.deleteImage(req.params.id);
+        await User.deleteUser(req.body.userId);
+        await Image.deleteAllImages(req.body.userId);
+        
         res.status(201).json({ message: "Utilisateur supprimé !" });
     }
     catch(err){

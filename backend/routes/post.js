@@ -1,4 +1,4 @@
-// Fichier contenant notre logique de routing - Publication
+// Fichier contenant notre logique de routing - Publication.
 const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/auth');
@@ -10,7 +10,7 @@ const postCtrl = require('../controllers/post');
 router.post('/', auth, multer, postCtrl.createPost);
 
 // C // Route pour liker ou disliker une publication - Like/dislike d'une publication.
-router.post('/:id/like', auth, postCtrl.likePost);            
+// router.post('/:id/like', auth, postCtrl.likePost);            
 
 // R // Route pour récupérer toutes publications - Renvoie le tableau de toutes les piblications dans la BDD.
 router.get('/', auth, postCtrl.getAllPosts);             

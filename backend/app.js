@@ -11,6 +11,9 @@ const userRoute = require ('./routes/user');
 // Importation du router post.
 const postRoute = require('./routes/post');
 
+// Importation du router comment.
+const commentRoute = require('./routes/comment');
+
 const post = require("./controllers/post");
 
 // Mise en place d'un header sécurisé pour lutter contre les failles XSS.
@@ -44,7 +47,10 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/user', userRoute);
 
 // pour cette route la, on utilise le router publicationsRoutes
-app.use('/post', postRoute);       
+app.use('/post', postRoute); 
+
+// pour cette route la, on utilise le router commentsRoutes
+app.use('/post', commentRoute);       
 
 // On exporte la constante app pour qu'on puisse y accéder depuis les autres fichiers de notre projet, notamment notre serveur Node.
 module.exports = app;
