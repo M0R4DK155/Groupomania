@@ -15,7 +15,7 @@ router.get('/', auth, commentCtrl.getAllComments);
 router.get('/:id', auth, commentCtrl.getOneComment);           
 
 // U // Route pour modifier un commentaire spécifique - Modification d'un commentaire avec l'id fourni.
-router.put('/:id', auth, multer, commentCtrl.modifyComment);   
+// router.put('/:id', auth, multer, commentCtrl.modifyComment);   
 
 // D // Route pour supprimer un commentaire spécifique - Supprime le commentaire avec l'id fourni.
 router.delete('/:id', auth, multer, commentCtrl.deleteComment);        

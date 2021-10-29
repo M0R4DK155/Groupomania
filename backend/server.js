@@ -3,15 +3,15 @@ require("dotenv").config();
 const http = require('http'); //On importe le package HTTP de Node.
 const app = require('./app');
 
-// la fonction normalizePort renvoie un port valide, qu'il soit fourni sous la forme d'un numéro ou d'une chaîne.
+// La fonction normalizePort renvoie un port valide, qu'il soit fourni sous la forme d'un numéro ou d'une chaîne.
 const normalizePort = val => {
-  const port = parseInt(val, 10); //analyse de l'argument passé, valeur obtenue assigné à une constante "port"
+  const port = parseInt(val, 10); // Analyse de l'argument passé, valeur obtenue assigné à une constante "port".
 
-  if (isNaN(port)) { // si la constante "port" n'est pas un Nombre (isNaN)
-    return val; // renvoie de l'argument qui passé à la fonction
+  if (isNaN(port)) { // Si la constante "port" n'est pas un Nombre (isNaN),
+    return val; // Renvoie de l'argument qui passé à la fonction.
   }
   if (port >= 0) {
-    return port; // si la valeur de la constante "port" est supérieur à zéro de donc valide: la fonction renvoie la constante "port".
+    return port; // Si la valeur de la constante "port" est supérieur à zéro de donc valide: la fonction renvoie la constante "port".
   }
   return false; // sinon (port<0) la fonction renvoie alors false.
 };
@@ -40,7 +40,7 @@ const errorHandler = error => {
   }
 };
 
-const server = http.createServer(app); //createServer = méthode http de Node qui permet de créer un serveur.
+const server = http.createServer(app); // createServer = méthode http de Node qui permet de créer un serveur.
 
 server.on('error', errorHandler);
 server.on('listening', () => {

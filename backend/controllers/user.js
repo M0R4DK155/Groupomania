@@ -8,8 +8,8 @@ require("dotenv").config();
 // Import des modules et fichiers complémentaires
 const bcrypt = require('bcrypt');           // Bibliothèque permettant de hacher les mots de passe.
 const jwt = require('jsonwebtoken');        // Permet de créer et vérifier des tokens d'authentification.
-
-const User = require('../models/User');
+const User = require('../models/User');     // On importe le model User
+const Image = require('../models/Image');   // On importe le model Image
 
 // Middlewares d'authentification.
 /**
@@ -20,29 +20,29 @@ const User = require('../models/User');
  * @param   {String}  req.body.firstname    Prénom de l'utilisateur.
  * @param   {String}  req.body.lastname     Nom de l'utilisateur.
  * @param   {String}  req.body.alias        Pseudo de l'utilisateur.
- * @param   {String}  req.body.avatar       Image du profil utilisateur.
  * @param   {String}  req.body.email        Email de l'utilisateur.
  * @param   {String}  req.body.password     Mot de passe de l'utilisateur.
  * @returns {Promise.<void>}                Envoi la réponse contenant un objet de type simpleMessage.
  */
-
 exports.signup = async (req, res, next) => {
     /**
      * la réponse
      *
      * @type {simpleMessage}
      */
-    let answer;
+    let answer = {};
     let status = 201;
     try {
+        if (User.checkIfAliasExists(req.body.alias)) throw {status:400, answer:"pseudo déjà existant"};
         req.body.password = await bcrypt.hash(req.body.password, 10);
         await User.addUser(req.body);
         answer.msg = 'Utilisateur créé !';
-        res.status(201).json({ message: " "});
+        res.status(201).json(answer);
     } 
     catch (error) {
+        // console.log(error.stack)
         answer = error;
-        status = 400;
+        status = error.status || 400;
     }
     finally{
         res.status(status).json(answer);
@@ -58,10 +58,9 @@ exports.signup = async (req, res, next) => {
  * @param   {String}  req.body.password     Mot de passe de l'utilisateur.
  *
  */
-
 exports.login = async (req, res, next) => {
     try {
-        const userData = await User.findUserByEmail(req.body.email); // Recherche de l'utilisateur dans la BDD.
+        const userData = await User.findUserByEmail(req.body.email); // Recherche de l'utilisateur par son email dans la BDD.
         const valid = await bcrypt.compare(
             req.body.password,
             userData.password
@@ -82,11 +81,11 @@ exports.login = async (req, res, next) => {
 };
 
 /**
- * Modifier le profil d'un utilisateur - api/user/profil
+ * Modifier le profil d'un utilisateur - api/auth/user/update
  *
  * @param   {Object}  req                   La requête.
  * @param   {Object}  req.body              Champs du formulaire.
- * @param   {Number}  req.body.userId       Id de l'utilisateur.
+ * @param   {Number}  req.body.userId       Id de l'utilisateur. (ou req.params.id ?)
  * @param   {String}  req.body.alias        Pseudo de l'utilisateur.
  * @param   {String}  req.body.avatar       Photo de Profil.
  * @param   {String}  req.body.firstname    Prénom de l'utilisateur.
@@ -109,13 +108,13 @@ exports.modifyUser = async (req, res, next) => {
 }
 
 /**
- * Afficher son profil utilisateur. - Route login /user/bio
+ * Afficher son profil utilisateur. - Route  api/auth/user/profil
  *
- * @param   {Object}    req               La requête
- * @param   {Object}    req.body          Champ du formulaire
- * @param   {String}    req.body.userId   email de l'utilisateur.
+ * @param   {Object}    req                     La requête
+ * @param   {Object}    req.body                Champ du formulaire
+ * @param   {String}    req.body.userId         Id de l'utilisateur.
  * 
- * @return  {Promise.<void>}              Rempli la réponse avec un FullUserDataFromBase et l'envoi.
+ * @return  {Promise.<FullUserDataFromBase>}    Rempli la réponse avec un FullUserDataFromBase et l'envoi.
  */
 exports.getOneUser = async (req, res, next) => {
     try {
@@ -128,7 +127,7 @@ exports.getOneUser = async (req, res, next) => {
 };
 
 /**
- * Supprimer un profil utilisateur - Route user
+ * Supprimer un profil utilisateur - Route api/auth/user/profil/delete
  *
  * @param   {Object}    req               La requête
  * @param   {Object}    req.body          Champ du formulaire

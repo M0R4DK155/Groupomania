@@ -7,6 +7,7 @@ const pool = mariadb.createPool({
     connectionLimit: 5,
 });
 
+// Fonction pour récupérer un seul tableau
 async function getOne(sql, data = []) {
     const result =  await query(sql, data);
     return result[0] || null;

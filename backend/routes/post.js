@@ -1,9 +1,9 @@
 // Fichier contenant notre logique de routing - Publication.
 const express = require('express');
-const router = express.Router();
-const auth = require('../middlewares/auth');
+const router = express.Router(); // Appel du routeur avec la méthode mise à disposition par Express.
+const auth = require('../middlewares/auth'); // Sécurisation des routes.
 const multer = require('../middlewares/multer-config'); // Package permettant le téléchargement de fichier.
-const postCtrl = require('../controllers/post');
+const postCtrl = require('../controllers/post'); // Importation du controller.
 
 
 // C // Route pour ajouter une publication - Création d'une publication et l'enregistre dans la BDD. (d'abord auth, ensuite multer, sinon requête pas authentifiée)

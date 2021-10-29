@@ -25,13 +25,24 @@
  */
 
 /**
- * les données d'un publications
+ * les données d'une publication.
  * @typedef     {Object}    postData
+ * @property    {String}    [id]
+ * @property    {String}    idAuthor
+ * @property    {String}    message
+ * @property    {String}    [image]
+ * @property    {Date}      [date]
+ */
+
+/**
+ * Les données d'un commentaire sur une publication.
+ * @typedef     {Object}    commentData
  * @property    {String}    [id]
  * @property    {String}    idAuthor
  * @property    {String}    message
  * @property    {String}    image
  * @property    {Date}      date
+ * @property    {String}    idPost
  */
 
 module.exports = {};

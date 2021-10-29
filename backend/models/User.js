@@ -11,21 +11,20 @@ const database = require("./database");
  * @param   {String}  user.firstname    Prénom de l'utilisateur.
  * @param   {String}  user.lastname     Nom de l'utilisateur.
  * @param   {String}  user.alias        Pseudo de l'utilisateur.
- * @param   {String}  user.avatar       Photo du Profil.
- * @param   {String}  user.password     Password de l'utilisateur.
  * @param   {String}  user.email        Email de l'utilisateur.
+ * @param   {String}  user.password     Password de l'utilisateur.
  *
  * @return  {Promise.<void>}            Insère les données dans la BDD.
  */
 
-module.exports.addUser = async function (user) {
+module.exports.addUser = async function (user){
     try {
-        const res = await database.query("INSERT INTO users(prenom, nom, pseudo, password, email, id_roles) VALUES (?,?,?,?,?,?,?)", [user.firstname, user.lastname, user.alias, user.avatar, user.password, user.email, 0]);
+        const res = await database.query("INSERT INTO users(prenom, nom, pseudo, email, password, role) VALUES (?,?,?,?,?,?)", [user.firstname, user.lastname, user.alias,  user.email, user.password, 0]);
     }
     catch (error) {
         throw {
             status: 500,
-            msg: error
+            msg: error + user
         };
     }
 }
@@ -53,7 +52,7 @@ module.exports.findUserByEmail = async function (email){
 }
 
 /**
- * Recherche d'un utilisateur par son email.
+ * Recherche d'un utilisateur par son Id.
  * 
  * @param   {String}  userId                     Id de l'utilisateur.
  *
@@ -73,6 +72,7 @@ module.exports.findUserById = async function (userId){
         });
     }
 }
+
 /**
  * Modification du profil utilisateur.
  *
@@ -102,7 +102,8 @@ module.exports.modifyUser = async function (user, id){
  *
  * @return  {Promise.<void>}    
  */
-module.exports.deleteUser = async function (id) {
+
+module.exports.deleteUser = async function (id){
     try {
         const res = await database.getOne("DELETE FROM users WHERE id = ?", [id]);
         return res;
@@ -113,4 +114,16 @@ module.exports.deleteUser = async function (id) {
             msg: error
         });
     }
+}
+
+/**
+ * Vérification de la disponibilité du pseudo.
+ *
+ * @param   {String}  alias         Pseudo de l'utilisateur.
+ *
+ * @return  {Promise.<Boolean>}     TRUE ou FALSE
+ */
+module.exports.checkIfAliasExists = async function (alias){
+    const res = await database.query("select id FROM users WHERE pseudo = ?", [alias]);
+    return res.length === 0 ? false : true;
 }

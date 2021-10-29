@@ -1,16 +1,16 @@
-// Base P6
 // Middleware d'authentification
 // importation du paquet jwt
 const jwt = require('jsonwebtoken');        
 
 /**
  * Vérifie l'autorisation de l'utilisateur
- *
+ * @param   {Object}  req
+ * @param   {Object}  req.headers
  * @param   {String}  req.headers.authorization     Bearer + numéro du Token.
+ * @param   {Object}  req.body                      Champs du formulaire.
  * @param   {String}  req.body.userId               userId de l'utilisateur.
  *
  */
-
 module.exports = (req, res, next) => {
     try {                                                                               // On utilise try/catch car plusieurs éléments peuvent poser problème.
         const token = req.headers.authorization.split(' ')[1];                          // On récupère uniquement le token du header de la requête.
@@ -22,6 +22,6 @@ module.exports = (req, res, next) => {
             next();                                                                     // Sinon on appelle next car la validation est un succès.
         }
     } catch {
-    res.status(401).json({error: error | 'Requête non authentifiée !'});                // Si une erreur d'authentification est reçue (401) on l'affiche, sinon on affiche le message personnalisé.
+    res.status(401).json({error: 'Requête non authentifiée !'});                // Si une erreur d'authentification est reçue (401) on l'affiche, sinon on affiche le message personnalisé.
     }
 };
