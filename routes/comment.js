@@ -8,16 +8,17 @@ const commentCtrl = require('../controllers/comment');
 // C // Route pour ajouter un commentaire - Création d'un commentaire et l'enregistre dans la BDD. (d'abord auth, ensuite multer, sinon requête pas authentifiée)
 router.post('/', auth, multer, commentCtrl.createComment);        
 
-// R // Route pour récupérer tous les commentaires - Renvoie le tableau de tous les commentaires dans la BDD.
-router.get('/', auth, commentCtrl.getAllComments);             
-
-// R // Route pour récupérer un commentaire spécifique - Renvoie le commentaire avec l'id fourni.
-router.get('/:id', auth, commentCtrl.getOneComment);           
+// D // Route pour supprimer un commentaire spécifique - Supprime le commentaire avec l'id fourni.
+router.delete('/:id', auth, multer, commentCtrl.deleteComment);  
 
 // U // Route pour modifier un commentaire spécifique - Modification d'un commentaire avec l'id fourni.
-// router.put('/:id', auth, multer, commentCtrl.modifyComment);   
+router.put('/:id', auth, multer, commentCtrl.modifyComment);      
 
-// D // Route pour supprimer un commentaire spécifique - Supprime le commentaire avec l'id fourni.
-router.delete('/:id', auth, multer, commentCtrl.deleteComment);        
+// R // Route pour récupérer tous les commentaires - Renvoie le tableau de tous les commentaires dans la BDD.
+// router.get('/', auth, commentCtrl.getAllComments);             
+
+// R // Route pour récupérer un commentaire spécifique - Renvoie le commentaire avec l'id fourni.
+// router.get('/:id', auth, commentCtrl.getOneComment);           
+ 
 
 module.exports = router;

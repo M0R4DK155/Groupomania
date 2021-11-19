@@ -8,8 +8,8 @@ require("dotenv").config();
 // Import des modules et fichiers complémentaires
 const bcrypt = require('bcrypt');           // Bibliothèque permettant de hacher les mots de passe.
 const jwt = require('jsonwebtoken');        // Permet de créer et vérifier des tokens d'authentification.
-const User = require('../models/User');     // On importe le model User
-const Image = require('../models/Image');   // On importe le model Image
+const User = require('../models/User');     // On importe le model User.
+const Image = require('../models/Image');   // On importe le model Image.
 
 // Middlewares d'authentification.
 /**
@@ -33,7 +33,7 @@ exports.signup = async (req, res, next) => {
     let answer = {};
     let status = 201;
     try {
-        if (User.checkIfAliasExists(req.body.alias)) throw {status:400, answer:"pseudo déjà existant"};
+        if (await User.checkIfAliasExists(req.body.alias)) throw {status:400, answer:"pseudo déjà existant"};
         req.body.password = await bcrypt.hash(req.body.password, 10);
         await User.addUser(req.body);
         answer.msg = 'Utilisateur créé !';
@@ -61,7 +61,7 @@ exports.signup = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     try {
         const userData = await User.findUserByEmail(req.body.email); // Recherche de l'utilisateur par son email dans la BDD.
-        const valid = await bcrypt.compare(
+        const valid = await bcrypt.compare( // On utilise la méthode compare de bcrypt pour comparer le MDP saisie et celui enegistré dans la BDD
             req.body.password,
             userData.password
         );
@@ -75,7 +75,9 @@ exports.login = async (req, res, next) => {
                 { expiresIn: '24h' } // Durée de validité du token.
             ),
         });
-    } catch (err) {
+    } 
+    catch (err) {
+        console.error(err);
         return res.status(err.status).json({ error: err.msg });
     }
 };

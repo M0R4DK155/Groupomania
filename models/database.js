@@ -7,12 +7,13 @@ const pool = mariadb.createPool({
     connectionLimit: 5,
 });
 
-// Fonction pour récupérer un seul tableau
+// Fonction pour récupérer un seul model.
 async function getOne(sql, data = []) {
     const result =  await query(sql, data);
     return result[0] || null;
 }
 
+// Fonction pour toutes les autres requêtes.
 async function query(sql, data = []) {
     let conn;
     try {
@@ -20,9 +21,11 @@ async function query(sql, data = []) {
         const response = await conn.query(sql, data);
         if (response.meta !== undefined) delete response.meta;
         return response;
-    } catch (err) {
+    } 
+    catch (err) {
         throw err;
-    } finally {
+    } 
+    finally {
         if (conn) conn.release(); //release to pool
     }
 }

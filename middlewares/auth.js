@@ -13,10 +13,13 @@ const jwt = require('jsonwebtoken');
  */
 module.exports = (req, res, next) => {
     try {                                                                               // On utilise try/catch car plusieurs éléments peuvent poser problème.
-        const token = req.headers.authorization.split(' ')[1];                          // On récupère uniquement le token du header de la requête.
+        if (!req.headers.authorization) throw "pas de jeton";
+        const [_, token, idToken] = req.headers.authorization.split(' ');                          // On récupère uniquement le token du header de la requête.
         const decodedToken = jwt.verify(token, process.env.SECRET);                     // On décode le token avec la fonction verify qui prend le token et la clé secrète.
-        const userId = decodedToken.userId;                                             // On récupère le userId du token décodé.
-        if (req.body.userId && req.body.userId !== userId) {                            // Si on obtient bien un userId et que celui-ci est différent du userId.
+        const userId = decodedToken.userId;// On récupère le userId du token décodé.
+        const refId = req.body.userId ? req.body.userId : idToken ;
+
+        if ( ! refId || refId !== userId) {                            // Si on obtient bien un userId et que celui-ci est différent du userId.
             throw 'Identifiant utilisateur non valable';                                // On renvoi l'erreur.
         } else {
             next();                                                                     // Sinon on appelle next car la validation est un succès.
