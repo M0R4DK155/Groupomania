@@ -21,7 +21,7 @@ app.use(helmet());
 
 // Active CORS pour éviter les attaques CSRF - sécurisation cors: origin localhost:3000
 app.use(cors({
-  origin: 'http://localhost:3000'
+  origin: 'http://localhost:8080'
 }));
 
 // Middleware général appliqué à toutes les requêtes (CORS).
